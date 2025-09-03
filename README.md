@@ -17,9 +17,9 @@ Plython to interpreter, który pozwala na pisanie kodu Pythona używając polski
 
 1. **Pobierz skrypt**:
    ```bash
-   curl -O https://raw.githubusercontent.com/twoj-username/plython/main/plython
+   curl -O https://raw.githubusercontent.com/Shieldowskyy/plython/main/plython
    # lub
-   wget https://raw.githubusercontent.com/twoj-username/plython/main/plython
+   wget https://raw.githubusercontent.com/Shieldowsky/plython/main/plython
    ```
 
 2. **Nadaj uprawnienia wykonywalne**:
@@ -215,3 +215,6 @@ echo 'drukuj("Witaj z Plythona!")' > test.ply
 ```
 
 **Happy coding! 🚀🇵🇱**
+
+## WAŻNE!
+To narzędzie zostało częściowo napisane z pomocą sztucznej inteligencji i może zawierać błędy! To README zostało tak napisane niemal całkowicie...
