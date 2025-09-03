@@ -9,7 +9,7 @@ Plython to interpreter, który pozwala na pisanie kodu Pythona używając polski
 ## 🚀 Instalacja
 
 ### Wymagania
-- Linux/macOS (Bash)
+- Linux/macOS/WSL (Bash)
 - Python 3.x
 - `sed` (standardowo dostępny w systemach Unix)
 
