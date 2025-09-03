@@ -3,12 +3,12 @@
 # plython - interpreter polskiego Pythona
 # Autor: Krzysztof "shieldziak" Tarczyński
 # Licencja: MIT
-# Wersja: 0.1
+# Wersja: 0.2
 # Opis: Tłumaczy polskie słowa kluczowe na Python i uruchamia kod
 
 set -euo pipefail  # Tryb strict
 
-VERSION="0.1"
+VERSION="0.2"
 
 show_help() {
     cat << EOF
@@ -32,6 +32,7 @@ OBSŁUGIWANE SŁOWA KLUCZOWE:
     funkcja -> def, klasa -> class, jeżeli -> if, inaczej -> else
     dla -> for, w -> in, dopóki -> while, zwróć -> return
     drukuj -> print, prawda -> True, fałsz -> False
+    tekst -> str, liczba -> int, lista -> list
     i więcej...
 EOF
 }
@@ -104,7 +105,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-# Słownik tłumaczeń - łatwiejszy w utrzymaniu
+# Słownik tłumaczeń - rozszerzony o type hints
 declare -A TRANSLATIONS=(
     # Definicje
     ["funkcja"]="def"
@@ -160,14 +161,20 @@ declare -A TRANSLATIONS=(
     ["zakres"]="range"
     ["wymiar"]="range"
     
-    # Typy danych
+    # Typy danych (dla type hints też)
     ["liczba"]="int"
     ["tekst"]="str"
     ["lista"]="list"
     ["słownik"]="dict"
+    ["krotka"]="tuple"
+    ["zbiór"]="set"
+    ["bool"]="bool"
+    ["logiczny"]="bool"
+    ["float"]="float"
+    ["rzeczywisty"]="float"
 )
 
-# Funkcja tłumacząca
+# Funkcja tłumacząca - ulepszona
 translate_file() {
     local input_file="$1"
     local output_file="$2"
@@ -175,16 +182,21 @@ translate_file() {
     # Skopiuj oryginalny plik
     cp "$input_file" "$output_file"
     
-    # Zastąp polskie słowa angielskimi
+    # Pierwsza faza: podstawowe tłumaczenia słów kluczowych
     for polish in "${!TRANSLATIONS[@]}"; do
         sed -i "s/\b${polish}\b/${TRANSLATIONS[$polish]}/g" "$output_file"
     done
     
-    # Dodatkowe poprawki
-    sed -i \
-        -e 's/ in in / in /g' \
-        -e 's/from import/from import/g' \
-        "$output_file"
+    # Druga faza: specjalne przypadki i poprawki
+    
+    # Napraw problem z podwójnym 'in in'
+    sed -i 's/ in in / in /g' "$output_file"
+    
+    # Napraw 'from import' bez słowa między
+    sed -i 's/from import/from import/g' "$output_file"
+    
+    # Napraw składnię def - dodaj dwukropek na końcu linii z def
+    sed -i 's/^def \([^:]*\)$/def \1:/g' "$output_file"
 }
 
 # Wykonaj tłumaczenie
@@ -193,6 +205,10 @@ translate_file "$PLIK" "$TEMP_FILE"
 # Sprawdź składnię Pythona
 if ! python3 -m py_compile "$TEMP_FILE" 2>/dev/null; then
     echo "Ostrzeżenie: Przetłumaczony kod może zawierać błędy składniowe" >&2
+    if [[ "$DEBUG" == true ]]; then
+        echo "Błędy składni:"
+        python3 -m py_compile "$TEMP_FILE"
+    fi
 fi
 
 # Pokaż przetłumaczony kod jeśli debug
